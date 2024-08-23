@@ -1,0 +1,2 @@
+[workspace]
+members = ["src/counter", "src/incrementor", "src/interfaces"]
