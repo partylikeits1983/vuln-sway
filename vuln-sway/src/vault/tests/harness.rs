@@ -1,11 +1,10 @@
 use fuels::tx::TxParameters;
 use fuels::{prelude::*, types::ContractId};
 
-// Load ABI from JSON
 abigen!(Contract(
-    name = "Counter",
-    abi = "src/counter/out/debug/counter-abi.json"
-));
+    name = "Vault",
+    abi = "src/vault/out/debug/vault-abi.json"
+),);
 
 // Declare the global wallet variable
 static mut WALLET: Option<WalletUnlocked> = None;
@@ -36,11 +35,11 @@ async fn get_wallet() -> &'static WalletUnlocked {
     }
 }
 
-async fn get_counter_contract_instance() -> (Counter<WalletUnlocked>, ContractId) {
+async fn get_vault_contract_instance() -> (Vault<WalletUnlocked>, ContractId) {
     let wallet = get_wallet().await;
 
     let id = Contract::load_from(
-        "./out/debug/counter.bin",
+        "../../src/counter/out/debug/counter.bin",
         LoadConfiguration::default().with_storage_configuration(
             StorageConfiguration::new(false, vec![]), // Use `new` instead of `load_from`
         ),
@@ -50,43 +49,15 @@ async fn get_counter_contract_instance() -> (Counter<WalletUnlocked>, ContractId
     .await
     .unwrap();
 
-    let instance = Counter::new(id, wallet.clone());
+    let instance = Vault::new(id, wallet.clone());
 
     (instance.clone(), instance.contract_id().into())
 }
 
 #[tokio::test]
-async fn initialize_and_increment() {
-    let (contract_instance, _id) = get_counter_contract_instance().await;
-    // Now you have an instance of your contract you can use to test each function
+async fn deploy_and_use_incrementor() {
+    // First deploy the Counter contract and get its ID
+    let (_vault_instance, counter_id) = get_vault_contract_instance().await;
 
-    let owner = get_wallet().await;
-
-    let init = contract_instance
-        .methods()
-        .initialize_owner(owner.address().into())
-        .call()
-        .await
-        .unwrap();
-
-    let result = contract_instance
-        .methods()
-        .initialize_counter(42)
-        .call()
-        .await
-        .unwrap();
-
-    assert_eq!(42, result.value);
-
-    // Call `increment_counter()` method in our deployed contract.
-    let result = contract_instance
-        .methods()
-        .increment_counter(10)
-        .call()
-        .await
-        .unwrap();
-
-    assert_eq!(52, result.value);
-
-    println!("value: {:?}", result.value);
+    println!("vault {:?}", counter_id);
 }

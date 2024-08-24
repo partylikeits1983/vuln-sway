@@ -3,24 +3,8 @@ name = "core"
 source = "path+from-root-D19F39D92CA9923C"
 
 [[package]]
-name = "counter"
-source = "member"
-dependencies = [
-    "interfaces",
-    "std",
-]
-
-[[package]]
-name = "incrementor"
-source = "member"
-dependencies = [
-    "interfaces",
-    "std",
-]
-
-[[package]]
 name = "interfaces"
-source = "member"
+source = "path+from-root-40287F21E3A72A97"
 dependencies = ["std"]
 
 [[package]]

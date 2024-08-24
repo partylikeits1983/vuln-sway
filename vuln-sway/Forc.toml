@@ -1,2 +1,2 @@
 [workspace]
-members = ["src/counter", "src/incrementor", "src/interfaces"]
+members = ["src/counter", "src/incrementor", "src/vault", "src/interfaces"]
