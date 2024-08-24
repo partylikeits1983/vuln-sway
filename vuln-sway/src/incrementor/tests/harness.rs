@@ -101,9 +101,19 @@ async fn deploy_and_use_incrementor() {
         .await
         .unwrap();
 
+
     // Now deploy the Incrementor contract using the Counter contract ID
-    let (incrementor_instance, _incrementor_id) =
+    let (incrementor_instance, incrementor_id) =
         get_incrementor_contract_instance(counter_id).await;
+
+
+    let new_owner = get_wallet().await.address();
+
+    println!("calling initialize owner");
+    let initialize_owner = counter_instance.methods().initialize_owner(incrementor_instance.id().into()).call().await.unwrap();
+    // let initialize_owner = counter_instance.methods().initialize_owner(new_owner.into()).call().await.unwrap();
+
+    println!("new owner: {:?}", initialize_owner.value);
 
     // Verify the counter contract ID from the incrementor contract
     let incrementor_counter_id = incrementor_instance
@@ -118,6 +128,7 @@ async fn deploy_and_use_incrementor() {
         "Incrementor contract is linked to counterID {:?}",
         incrementor_counter_id
     );
+
     assert_eq!(counter_id, incrementor_counter_id);
 
     // Now increment the counter through the Incrementor contract
