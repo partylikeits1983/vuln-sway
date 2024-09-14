@@ -39,7 +39,7 @@ async fn get_vault_contract_instance() -> (Vault<WalletUnlocked>, ContractId) {
     let wallet = get_wallet().await;
 
     let id = Contract::load_from(
-        "../../src/counter/out/debug/counter.bin",
+        "../../src/vault/out/debug/vault.bin",
         LoadConfiguration::default().with_storage_configuration(
             StorageConfiguration::new(false, vec![]), // Use `new` instead of `load_from`
         ),
@@ -56,8 +56,8 @@ async fn get_vault_contract_instance() -> (Vault<WalletUnlocked>, ContractId) {
 
 #[tokio::test]
 async fn deploy_and_use_incrementor() {
-    // First deploy the Counter contract and get its ID
-    let (_vault_instance, counter_id) = get_vault_contract_instance().await;
+    // First deploy the vault contract and get its ID
+    let (_vault_instance, vault_id) = get_vault_contract_instance().await;
 
-    println!("vault {:?}", counter_id);
+    println!("vault {:?}", vault_id);
 }

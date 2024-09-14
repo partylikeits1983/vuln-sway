@@ -1,7 +1,15 @@
 contract;
 
+mod errors;
+
 use interfaces::vault::Vault;
-use std::{asset::transfer, context::msg_amount, hash::Hash};
+use std::{asset::transfer, context::msg_amount, hash::Hash, call_frames::msg_asset_id};
+
+use errors::DepositError;
+
+configurable {
+    ASSET_ID: AssetId = AssetId::zero(),
+}
 
 storage {
     balances: StorageMap<Identity, u64> = StorageMap::<Identity, u64> {},
@@ -11,8 +19,11 @@ storage {
 impl Vault for Contract {
     #[payable]
     #[storage(read, write)]
-    fn deposit(receiver: Identity, vault_sub_id: SubId) -> u64 {
+    fn deposit(receiver: Identity) -> u64 {
         let amount: u64 = msg_amount();
+        let asset = msg_asset_id();
+
+        require(asset == ASSET_ID, DepositError::InvalidAsset);
 
         storage.balances.insert(receiver, amount);
 
@@ -20,14 +31,15 @@ impl Vault for Contract {
     }
 
     #[storage(read, write)]
-    fn withdraw(
-        receiver: Identity,
-        underlying_asset: AssetId,
-        vault_sub_id: SubId,
-    ) -> u64 {
-        let amount = storage.balances.get(receiver).try_read().unwrap();
+    fn withdraw(receiver: Identity, amount: u64) -> u64 {
+        let debitor = msg_sender().unwrap();
+        let balance = storage.balances.get(debitor).try_read().unwrap();
 
-        if amount > 0 {
+        let new_balance = balance - amount;
+
+        if new_balance > 0 {
+            storage.balances.insert(debitor, new_balance);
+
             transfer(receiver, AssetId::base(), amount);
         } else {
             revert(0);
